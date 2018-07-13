@@ -25,8 +25,14 @@ class App extends Component {
       xhr.send(JSON.stringify({value: this.state.value}));
 
       xhr.onreadystatechange = function() {
-        console.log(xhr); //.responseText
+        if(xhr.readyState === 4) {
+          let data = JSON.parse(xhr.response).data;
+          data.forEach(element => {
+            console.log(element);
+          });
+          alert( Object.keys( data ).length );
 
+        }
         // this.setState({ data: xhr.responseText }, () => {
 
         //   ReactDOM.render(
