@@ -19,7 +19,8 @@ class List extends Component {
                 <div key={index} className="storeItem"> 
                     <p className="itemTitle">{item._id.title}</p>
                     <a href={item.dups[0]}>Тык</a>
-                    <div className="counter">{item.count}</div>
+                    <div className="counter">Х{item.count}</div>
+                    <hr/>
                 </div>
             )}</div>
         )

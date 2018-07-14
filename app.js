@@ -73,38 +73,54 @@ let max = 5050;
   // Отправляем запрос на получение всех товаров указанного продавца
     ebay.get('finding', params, function(err, data) {
       if(err) {
-        throw new Error(err);
+        console.error(err);
       }
-      let response = Array.from(data.findItemsAdvancedResponse[0].searchResult[0].item);
-
-      // Перебор данных и внос в бд
-      response.map((oneItem, index) => {
-        let ItemMongo = new Item({
-          _id: mongoose.Types.ObjectId(),
-          title: oneItem.title[0],
-          category: oneItem.primaryCategory[0].categoryName[0],
-          link: oneItem.viewItemURL[0],
-          img: oneItem.galleryURL[0],
-        });
-
-        ItemMongo.save(function(err) {
-          if(err) {
-            throw err;
-          }
-        });
-      });
       
-      max -= page;
-      // console.log(max);
-      if(max === 0) {
-        next();
+      if(data.findItemsAdvancedResponse[0].ack[0] == "Failure" ||
+      data.findItemsAdvancedResponse[0].searchResult[0].item === undefined ||
+      data.findItemsAdvancedResponse[0].searchResult[0].item === null) {
+        res.end('fail');
+        return;
       }
+
+      else {
+        if(data.findItemsAdvancedResponse[0].searchResult[0].item !== undefined ||
+          data.findItemsAdvancedResponse[0].searchResult[0].item !== null) {
+
+            let response = Array.from(data.findItemsAdvancedResponse[0].searchResult[0].item);
+
+            // Перебор данных и внос в бд
+            response.map((oneItem, index) => {
+              let ItemMongo = new Item({
+                _id: mongoose.Types.ObjectId(),
+                title: oneItem.title[0],
+                category: oneItem.primaryCategory[0].categoryName[0],
+                link: oneItem.viewItemURL[0],
+                img: oneItem.galleryURL[0],
+              });
+
+              ItemMongo.save(function(err) {
+                if(err) {
+                  console.error(err);
+                }
+              });
+            });
+            
+            max -= page;
+            // console.log(max);
+            if(max === 0) {
+              next();
+            }
+          }
+        }
+        
+
+      
     });
     
   }
 },
 function(req, res, next) {
-  console.log('successfull');
   Item.aggregate([
     {
       "$group": { "_id": {  "title": "$title" },

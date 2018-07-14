@@ -18,23 +18,34 @@ class App extends Component {
 
   handleSubmit(event) {
     var content = document.getElementById('content');
+    // document.getElementById('searchButton').setAttribute('disabled', 'disabled');
+    // document.getElementById('searchInput').setAttribute('disabled', 'disabled');
 
       let xhr = new XMLHttpRequest();
       xhr.open('post', '/getStore', true);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.send(JSON.stringify({value: this.state.value}));
 
+      document.getElementById('searchButton').innerText = 'Собираем данные, пожалуйста подождите...';
+
       let getData;
       xhr.onreadystatechange = function() {
         if(xhr.readyState === 4) {
-          getData = JSON.parse(xhr.response).data;
+          if(xhr.responseText == 'fail') {
+            alert('Не удалось найти магазин с таким именем. Проверьте правильность введенных данных и повторите попытку.')
+          }
+          else {
+            document.getElementById('searchButton').innerText = 'Данные успешно получены.';
+            getData = JSON.parse(xhr.response).data;
+              if(getData) {
+                ReactDOM.render(
+                  <List store={getData} />,
+                  content
+                );
+              }
+          }
 
-           if(getData) {
-            ReactDOM.render(
-              <List store={getData} />,
-              content
-            );
-           }
+          
           // alert(Object.keys(data).length);
 
         }
@@ -48,11 +59,12 @@ class App extends Component {
   render() {
     return (
       <div>
-        <input type="text"
+        <input id="searchInput"
+          type="text"
           placeholder="Hello!"
           value={this.state.value}
           onChange={this.handleChange} />
-        <button onClick={this.handleSubmit}>
+        <button id="searchButton" onClick={this.handleSubmit}>
           Найти магазин
         </button>
         <div id="content"></div>
