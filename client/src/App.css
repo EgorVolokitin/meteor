@@ -1,28 +1,36 @@
+body {
+  background: url(./background.jpg);
+}
+
+#content {
+  padding-bottom: 10px;
+}
+
 .App {
+  width: 1000px;
+  margin: 0 auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  min-height: 93vh;
+  max-height: 10%;
+  background-color: rgb(241, 241, 241);
+}
+
+.header {
   text-align: center;
 }
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.header input, button {
+  margin: 15px;
+  padding: 10px;
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border: 2px solid #8f8f8f;
+  border-radius: 3px;
+}
+.header input {
+  width: 250px;
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.header button:hover {
+  cursor: pointer;
 }

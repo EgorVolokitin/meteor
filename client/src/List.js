@@ -1,35 +1,18 @@
 import React, { Component } from 'react';
+import './List.css';
 
 class List extends Component {
-    state = {title: 'Выполняется поиск, пожалуйста подождите...' };
-
-    componentDidMount() {
-
-        setTimeout(() => {
-            this.setState({ title: 'Данные не найдены, обновите страницу и попробуйте снова.' })
-        }, 15000);
-    };
-
     render() {
-
-        if(this.props.store.length > 0) {
-            return (
-                <div>
-                  <h4>Названия товаров одинаковы у</h4>
-
-                    {this.props.store.map((s, index) => 
-                        <p key={index}>{s}</p>
-                    )}
+        return(
+            <div className="Item">{this.props.store.map((item, index) => 
+                <div key={index} className="storeItem"> 
+                    <div className="counter">x{item.count}</div>
+                    <p className="itemTitle">{item._id.title}</p>
+                    <br />
+                    <a href={item.dups[0]}>Открыть товар</a>
                 </div>
-              );
-        }
-        else {
-            return (
-                <div>
-                    <h5>{this.state.title}</h5>
-                </div>
-            );
-        }
+            )}</div>
+        )
     }
 }
 
