@@ -14,6 +14,7 @@ const ebay = new Ebay({
   app_id: 'EgorVolo-titler-PRD-f66850dff-5f54355a'
 });
 
+// Создаем схему для вноса данных в монго.
 let itemSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   category: String, // category name
@@ -21,10 +22,10 @@ let itemSchema = mongoose.Schema({
   link: String, // url-address by item
   title: String,
 });
-
 const Item = mongoose.model('Item', itemSchema);
 
 app.use('/getStore', function(req, res, next) {
+  // Коннект к бд
   mongoose.connect('mongodb://localhost/ebay_titler', function(err) {
     if(err) {
       throw new Error(err);
@@ -50,6 +51,9 @@ function(req, res, next) {
 function(req, res, next) {
   let max = 0;
 
+  // Запрашиваем данные с ebay с помощью api 100 раз
+  // (по одному разу на каждую страницу).
+  // Больше 100 страниц api не дает получить.
   for(let page = 1; page < 100; page++) {
     max += page;
     // Параметры для отправки на апи ebay
@@ -95,8 +99,10 @@ function(req, res, next) {
               });
             });
 
-            max -= page;
-            // console.log(max);
+            // Так как функция асинхронная, этим способом мы будем точно знать,
+            // что все 100 страниз успешно сохранены
+            max -= page; 
+
             if(max === 0) {
               next();
             }
@@ -106,7 +112,7 @@ function(req, res, next) {
   }
 },
 function(req, res, next) {
-  console.error('successfull');
+  // Для получения одинаковых тайтлов используем агрегацию
   Item.aggregate([
     {
       '$group': { '_id': { 'title': '$title' },
@@ -115,13 +121,14 @@ function(req, res, next) {
       }
     },
     {
-      '$match': { 'count':  { '$gt': 1 }, 'dups': { '$not': /var/ } }
+      '$match': { 'count':  { '$gt': 1 }, 'dups': { '$not': /var/ } } // Убираем из выдачи все ссылки в которых есть 'var'.
     }
   ], function(err, result) {
     if(err) {
       throw err;
     }
 
+    // Отравляем данные клиенту в формате json
     res.json({data: result});
   });
 });
