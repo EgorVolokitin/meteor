@@ -59,9 +59,10 @@ function(req, res, next) {
   });
 },
 function(req, res, next) {
-let max = 5050;
+let max = 0;
 
-  for(let page = 100; page > 0; page --) {
+  for(let page = 1; page < 100; page++) {
+    max += page;
     // Параметры для отправки на апи ebay
     let params = {
       'OPERATION-NAME': 'findItemsAdvanced',
@@ -121,6 +122,7 @@ let max = 5050;
   }
 },
 function(req, res, next) {
+  console.error('successfull');
   Item.aggregate([
     {
       "$group": { "_id": {  "title": "$title" },

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-// import logo from './logo.svg';
 import './App.css';
 import List from './List';
+import Info from './Info';
 
 class App extends Component {
   constructor(props) {
@@ -26,47 +26,62 @@ class App extends Component {
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.send(JSON.stringify({value: this.state.value}));
 
-      document.getElementById('searchButton').innerText = 'Собираем данные, пожалуйста подождите...';
+      ReactDOM.render(
+        <Info message="Собираем данные. Пожалуйста, подождите..." />,
+        content
+      );
 
       let getData;
       xhr.onreadystatechange = function() {
         if(xhr.readyState === 4) {
-          if(xhr.responseText == 'fail') {
-            alert('Не удалось найти магазин с таким именем. Проверьте правильность введенных данных и повторите попытку.')
+          if(xhr.responseText === 'fail') {
+
+            ReactDOM.render(
+              <Info message="Не удалось найти магазин с таким именем. Проверьте правильность введенных данных или повторите попытку позднее." />,
+              content
+            );
           }
           else {
-            document.getElementById('searchButton').innerText = 'Данные успешно получены.';
+
             getData = JSON.parse(xhr.response).data;
-              if(getData) {
+
+              if(Object.keys(getData).length > 0) {
+
                 ReactDOM.render(
-                  <List store={getData} />,
+                  <Info message="Данные получены, выводим на страницу..." />,
+                  content
+                );
+                setInterval(() => {
+                  ReactDOM.render(
+                    <List store={getData} />,
+                    content
+                  );
+                },3000)
+                
+              }
+              else {
+                ReactDOM.render(
+                  <Info message="У данного продавца не нашлось товаров с одинаковым названием." />,
                   content
                 );
               }
           }
-
-          
-          // alert(Object.keys(data).length);
-
         }
-        // this.setState({ data: getData });
-
       }
-
-      
   }
 
   render() {
     return (
-      <div>
-        <input id="searchInput"
-          type="text"
-          placeholder="Hello!"
-          value={this.state.value}
-          onChange={this.handleChange} />
-        <button id="searchButton" onClick={this.handleSubmit}>
-          Найти магазин
-        </button>
+      <div className="App">
+        <div className="header">
+          <input id="searchInput"
+            type="text"
+            placeholder="Введите ник продавца"
+            value={this.state.value}
+            onChange={this.handleChange} />
+          <button id="searchButton" onClick={this.handleSubmit}>Найти соответствия</button>
+        </div>
+        <hr/>
         <div id="content"></div>
       </div>
     );
