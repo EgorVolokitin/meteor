@@ -4,6 +4,7 @@ import './List.css';
 class List extends Component {
   render() {
     return(
+      // Перебираем массив который был передан в props и выводим информацию из него на страницу
       <div className="Item">{this.props.store.map((item, index) => 
         <div key={index} className="storeItem"> 
           <div className="counter">x{item.count}</div>
