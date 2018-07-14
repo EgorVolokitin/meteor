@@ -18,8 +18,8 @@ class App extends Component {
 
   handleSubmit(event) {
     var content = document.getElementById('content');
-    // document.getElementById('searchButton').setAttribute('disabled', 'disabled');
-    // document.getElementById('searchInput').setAttribute('disabled', 'disabled');
+
+    ReactDOM.unmountComponentAtNode(content);
 
       let xhr = new XMLHttpRequest();
       xhr.open('post', '/getStore', true);
@@ -30,6 +30,8 @@ class App extends Component {
         <Info message="Собираем данные. Пожалуйста, подождите..." />,
         content
       );
+      document.getElementById('searchButton').setAttribute('disabled', 'disabled');
+      document.getElementById('searchInput').setAttribute('disabled', 'disabled');
 
       let getData;
       xhr.onreadystatechange = function() {
@@ -40,9 +42,10 @@ class App extends Component {
               <Info message="Не удалось найти магазин с таким именем. Проверьте правильность введенных данных или повторите попытку позднее." />,
               content
             );
+            document.getElementById('searchButton').removeAttribute('disabled');
+            document.getElementById('searchInput').removeAttribute('disabled');
           }
           else {
-
             getData = JSON.parse(xhr.response).data;
 
               if(Object.keys(getData).length > 0) {
@@ -51,11 +54,13 @@ class App extends Component {
                   <Info message="Данные получены, выводим на страницу..." />,
                   content
                 );
-                setInterval(() => {
+                setTimeout(() => {
                   ReactDOM.render(
                     <List store={getData} />,
                     content
                   );
+                  document.getElementById('searchButton').removeAttribute('disabled');
+                  document.getElementById('searchInput').removeAttribute('disabled');
                 },3000)
                 
               }
@@ -64,6 +69,9 @@ class App extends Component {
                   <Info message="У данного продавца не нашлось товаров с одинаковым названием." />,
                   content
                 );
+
+                document.getElementById('searchButton').removeAttribute('disabled');
+                document.getElementById('searchInput').removeAttribute('disabled');
               }
           }
         }

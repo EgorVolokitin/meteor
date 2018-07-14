@@ -3,12 +3,12 @@ import './Info.css';
 
 class Info extends Component {
 
-    render() {
+  render() {
 
-        return(
-            <div className="Info">{this.props.message}</div>
-        )
-    }
+    return(
+      <div className="Info">{this.props.message}</div>
+    )
+  }
 }
 
 export default Info;
