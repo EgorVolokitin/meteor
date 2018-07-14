@@ -1,49 +1,38 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var Ebay = require('ebay');
-var mongoose = require('mongoose');
+const createError = require('http-errors'),
+  express = require('express'),
+  logger = require('morgan'),
+  Ebay = require('ebay'),
+  mongoose = require('mongoose');
 
-var getStoreRouter = require('./routes/getStore');
-
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
 
 const ebay = new Ebay({
   app_id: 'EgorVolo-titler-PRD-f66850dff-5f54355a'
 });
 
-var itemSchema = mongoose.Schema({
+let itemSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  title: String,
   category: String, // category name
-  link: String, // url-address by item
   img: String, // url-address by item-image
+  link: String, // url-address by item
+  title: String,
 });
 
-var Item = mongoose.model('Item', itemSchema);
+const Item = mongoose.model('Item', itemSchema);
 
 app.use('/getStore', function(req, res, next) {
   mongoose.connect('mongodb://localhost/ebay_titler', function(err) {
-  if(err) {
-    throw new Error(err);
-  }
-  else {
-    next();
-  }
-});
+    if(err) {
+      throw new Error(err);
+    }
+    else {
+      next();
+    }
+  });
 },
 
 function(req, res, next) {
@@ -59,7 +48,7 @@ function(req, res, next) {
   });
 },
 function(req, res, next) {
-let max = 0;
+  let max = 0;
 
   for(let page = 1; page < 100; page++) {
     max += page;
@@ -71,12 +60,12 @@ let max = 0;
       'paginationInput.pageNumber': page
     };
 
-  // Отправляем запрос на получение всех товаров указанного продавца
+    // Отправляем запрос на получение всех товаров указанного продавца
     ebay.get('finding', params, function(err, data) {
       if(err) {
         console.error(err);
       }
-      
+
       if(data.findItemsAdvancedResponse[0].ack[0] == "Failure" ||
       data.findItemsAdvancedResponse[0].searchResult[0].item === undefined ||
       data.findItemsAdvancedResponse[0].searchResult[0].item === null) {
@@ -99,14 +88,13 @@ let max = 0;
                 link: oneItem.viewItemURL[0],
                 img: oneItem.galleryURL[0],
               });
-
               ItemMongo.save(function(err) {
                 if(err) {
                   console.error(err);
                 }
               });
             });
-            
+
             max -= page;
             // console.log(max);
             if(max === 0) {
@@ -114,33 +102,29 @@ let max = 0;
             }
           }
         }
-        
-
-      
     });
-    
   }
 },
 function(req, res, next) {
   console.error('successfull');
   Item.aggregate([
     {
-      "$group": { "_id": {  "title": "$title" },
-        "dups": { "$push": "$link"  },
-        "count": {  "$sum": 1 }
+      '$group': { '_id': { 'title': '$title' },
+        'count': { '$sum': 1 },
+        'dups': { '$push': '$link' },
       }
     },
     {
-      "$match": { "count":  {  "$gt": 1  }, "dups": { "$not": /var/ }  }
+      '$match': { 'count':  { '$gt': 1 }, 'dups': { '$not': /var/ } }
     }
   ], function(err, result) {
-      if(err) {
-        throw err;
-      }
+    if(err) {
+      throw err;
+    }
 
-      res.json({data: result});
-    });
+    res.json({data: result});
   });
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
