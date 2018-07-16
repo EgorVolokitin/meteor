@@ -20,12 +20,14 @@ let itemSchema = mongoose.Schema({
   category: String, // category name
   img: String, // url-address by item-image
   link: String, // url-address by item
+  seller: String, // Seller name
   title: String,
 });
 const Item = mongoose.model('Item', itemSchema);
 
 app.use('/getStore', function(req, res, next) {
   // Коннект к бд
+  // Плохая практика использовать мидлы.
   mongoose.connect('mongodb://localhost/ebay_titler', function(err) {
     if(err) {
       throw new Error(err);
@@ -37,17 +39,15 @@ app.use('/getStore', function(req, res, next) {
 },
 
 function(req, res, next) {
-  // Удаляем коллекцию чтобы очистить старые данные
-  Item.removeAllListeners();
-  mongoose.connection.dropCollection('items', function(err) {
-    if(err && err.message !== 'ns not found') {
-      throw err;
+  // Удаляем данные указанного магазина
+  Item.deleteMany({seller: req.body.value}, (err) => {
+    if(err) {
+      console.error(`ERROR :: ${err}`);
     }
-    else {
-      next();
-    }
+    next();
   });
 },
+
 function(req, res, next) {
   let max = 0;
 
@@ -88,6 +88,7 @@ function(req, res, next) {
               let ItemMongo = new Item({
                 _id: mongoose.Types.ObjectId(),
                 title: oneItem.title[0],
+                seller: req.body.value,
                 category: oneItem.primaryCategory[0].categoryName[0],
                 link: oneItem.viewItemURL[0],
                 img: oneItem.galleryURL[0],
@@ -98,7 +99,6 @@ function(req, res, next) {
                 }
               });
             });
-
             // Так как функция асинхронная, этим способом мы будем точно знать,
             // что все 100 страниз успешно сохранены
             max -= page; 
@@ -111,6 +111,7 @@ function(req, res, next) {
     });
   }
 },
+
 function(req, res, next) {
   // Для получения одинаковых тайтлов используем агрегацию
   Item.aggregate([
@@ -118,10 +119,15 @@ function(req, res, next) {
       '$group': { '_id': { 'title': '$title' },
         'count': { '$sum': 1 },
         'dups': { '$push': '$link' },
+        'seller': { '$push': '$seller' },
       }
     },
     {
-      '$match': { 'count':  { '$gt': 1 }, 'dups': { '$not': /var/ } } // Убираем из выдачи все ссылки в которых есть 'var'.
+      '$match': {
+        'count':  { '$gt': 1 },
+        'dups': { '$not': /var/ }, // Убираем из выдачи все ссылки в которых есть 'var'
+        'seller': req.body.value // Добавляем в выдачу только те документы котрые имеют введенного продавца.
+      }
     }
   ], function(err, result) {
     if(err) {

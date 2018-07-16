@@ -29,7 +29,7 @@ class App extends Component {
 
       // В это время выводим "обнадеживающее" сообщение
       ReactDOM.render(
-        <Info message="Собираем данные. Ebay выдает данные крайне медленно + они проходят обработку. В общем, это на долго. Пожалуйста подождите." />,
+        <Info message="Собираем данные пожалуйста подождите..." />,
         content
       );
 
@@ -45,7 +45,7 @@ class App extends Component {
           if(xhr.responseText === 'fail') {
             // Поэтому мы ему об этом скажем
             ReactDOM.render(
-              <Info message="Не удалось найти магазин с таким именем. Проверьте правильность введенных данных или повторите попытку позднее (нет)." />,
+              <Info message="Не удалось найти магазин с таким именем. Проверьте правильность введенных данных или повторите попытку позднее." />,
               content
             );
             // И конечно же разблокируем кнопку с инпутом.
@@ -73,7 +73,7 @@ class App extends Component {
                 // Так что разблокируем кнопку и инпут.
                 document.getElementById('searchButton').removeAttribute('disabled');
                 document.getElementById('searchInput').removeAttribute('disabled');
-              },2000)
+              },1000)
             }
             else {
               // Есди же длина массива оказалась равной нулю -
