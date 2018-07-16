@@ -14,6 +14,9 @@ const ebay = new Ebay({
   app_id: 'EgorVolo-titler-PRD-f66850dff-5f54355a'
 });
 
+// Адресс бд
+const databaseUrl = 'mongodb://localhost/ebay_titler';
+
 // Создаем схему для вноса данных в монго.
 let itemSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
@@ -28,7 +31,7 @@ const Item = mongoose.model('Item', itemSchema);
 app.use('/getStore', function(req, res, next) {
   // Коннект к бд
   // Плохая практика использовать мидлы.
-  mongoose.connect('mongodb://localhost/ebay_titler', function(err) {
+  mongoose.connect(databaseUrl, function(err) {
     if(err) {
       throw new Error(err);
     }
